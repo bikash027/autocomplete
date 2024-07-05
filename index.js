@@ -1,10 +1,20 @@
 const express = require('express')
 const bodyParser = require('body-parser')
-// const dbConfig = require('./dbConfig');
-// const config = require('config');
-// const dbConnection = config.get('db');
 const fs = require('fs').promises;
 const getRandom = require('./utils/get-random')
+const multer = require('multer');
+
+// const storage = multer.diskStorage({
+//     destination: function (req, file, cb) {
+//       cb(null, './assets/training-data/')
+//     },
+//     filename: function (req, file, cb) {
+//     //   const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
+//       cb(null, req.body.name + '.txt');
+//     }
+// })
+const storage = multer.memoryStorage();
+const upload = multer({storage});
 
 const app = express()
 const port = 3000
@@ -19,12 +29,12 @@ app.use(bodyParser.json())
 app.use(express.static('client'))
 
 
-app.get('/train', async (req, res, next) => {
+app.post('/train', upload.single('file'), async (req, res, next) => {
     try{
-        const fileData = await fs.readFile('./assets/training-data/eye of the world.txt', 'utf-8');
-        // console.log(fileData);/
-        const sentences = fileData.split(/\?|\n|\r|\./) 
-        // console.log(sentences)
+        // const fileData = await fs.readFile('./assets/training-data/eye of the world.txt', 'utf-8');
+        const fileData = req.file.buffer.toString('utf-8');
+        await fs.writeFile(`assets/training-data/${req.body.name}.txt`, fileData, 'utf-8');
+        const sentences = fileData.split(/\?|\n|\r|\./)
         let sentenceArr = sentences.map(sentence => sentence.split(' '))
         sentenceArr = sentenceArr.map(sentence => sentence.map(word => word.replace(',', '')))
         sentenceArr = sentenceArr.filter(sentence => sentence.length > 1)
@@ -57,8 +67,8 @@ app.get('/train', async (req, res, next) => {
             })
             model[word] = transitionProbabilities;
         })
-        await fs.writeFile('assets/trained-models/eye of the world.json', JSON.stringify(model), 'utf-8');
-        res.json({model});
+        await fs.writeFile(`assets/trained-models/${req.body.name}.json`, JSON.stringify(model), 'utf-8');
+        res.json({success: true});
     } catch(e) {
         next(e);
     } finally {
@@ -66,10 +76,10 @@ app.get('/train', async (req, res, next) => {
     }
 })
 
-app.get('/next-word/:corpus/:word', async (req, res, next) => {
+app.get('/next-word/:dataset/:word', async (req, res, next) => {
     try{
-        const {corpus, word} = req.params;
-        const modelJSON = await fs.readFile(`assets/trained-models/${corpus}.json`, 'utf-8');
+        const {dataset, word} = req.params;
+        const modelJSON = await fs.readFile(`assets/trained-models/${dataset}.json`, 'utf-8');
         const model = JSON.parse(modelJSON);
         let transitionProbabilities = model[word.toLowerCase()];
         if(!transitionProbabilities){
@@ -84,6 +94,16 @@ app.get('/next-word/:corpus/:word', async (req, res, next) => {
         next(e);
     } finally {
         // await connection.end()
+    }
+})
+
+app.get('/datasets', async (req, res, next) => {
+    try {
+        const files = await fs.readdir('assets/trained-models/');
+        const datasets = files.map(file => file.split('.')[0])
+        res.json({datasets});
+    } catch(e) {
+        next(e);
     }
 })
 

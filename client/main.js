@@ -1,5 +1,11 @@
+import {newDatasetElement} from './newDataset.js';
+import {selectedDataset, fetchDatasets} from './fetchDatasets.js'
+const mainElement = document.getElementById('main');
 const inputElement = document.getElementsByTagName('textarea')[0];
 const secondSuggestion = document.getElementById('second-suggestion');
+const addDatasetButton = document.getElementById('addDataset');
+
+
 inputElement.addEventListener('input', async (e) => {
     const text = e.target.value;
     if(text[text.length - 1] != ' '){
@@ -17,7 +23,7 @@ inputElement.addEventListener('input', async (e) => {
         return;
     }
 
-    const response = await fetch(`/next-word/eye of the world/${lastWord}`)
+    const response = await fetch(`/next-word/${selectedDataset}/${lastWord}`)
 
     if (!response.ok) {
         console.log(`HTTP error! Status: ${response.status}`);
@@ -31,3 +37,11 @@ secondSuggestion.addEventListener('click', () => {
     inputElement.value = inputElement.value + secondSuggestion.textContent;
     inputElement.focus();
 })
+
+addDatasetButton.addEventListener('click', () => {
+    mainElement.style.display = 'none';
+    newDatasetElement.style.display = 'flex';
+})
+
+window.addEventListener('load', fetchDatasets);
+

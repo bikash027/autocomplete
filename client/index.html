@@ -4,14 +4,24 @@
         <link rel="stylesheet" type="text/css" href="./index.css" /> 
     </head>
     <body>
+        <!-- MAIN PAGE -->
         <div id="main">
+            <select id="datasetSelect">
+            </select>
             <div id="suggestions">
                 <p>&nbsp;</p>
                 <p id="second-suggestion">&nbsp;</p>
                 <p>&nbsp;</p>
             </div>
             <textarea></textarea>
+            <button id="addDataset">Add new dataset</button>
         </div>
-        <script src="./index.js"></script>
+        <!-- NEW DATASET PAGE -->
+        <div id="newDataset">
+            <input type="text" id="datasetNameInput" placeholder="name">
+            <input type="file" id="fileInput">
+            <button id="datasetSubmit">Submit</button>
+        </div>
+        <script type = "module" src="./main.js"></script>
     </body>
 </html>
