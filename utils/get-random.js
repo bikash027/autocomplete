@@ -1,9 +1,12 @@
 module.exports = function getRandom (results, weights) {
-    var num = Math.random(),
+    if(!results || !results.length){
+        return '';
+    }
+    let num = Math.random(),
         s = 0,
         lastIndex = weights.length - 1;
 
-    for (var i = 0; i < lastIndex; ++i) {
+    for (let i = 0; i < lastIndex; ++i) {
         s += weights[i];
         if (num < s) {
             return results[i];
