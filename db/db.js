@@ -113,9 +113,9 @@ const Transition = sequelize.define(
 );
 
 
-// (async () => {
-//     await sequelize.sync({ force: true });
-//     // Code here
-// })();
+(async () => {
+    await sequelize.sync();
+    // Code here
+})();
 
 module.exports = {sequelize, Dataset, Graph, State, Transition};
